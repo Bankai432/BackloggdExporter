@@ -1,92 +1,125 @@
+import argparse
 import csv
+import sys
+import time
+
 import requests
 from bs4 import BeautifulSoup
-import argparse
 
-# Fetch the game entries from a specific profile page
+BASE_URL = "https://backloggd.com"
+TIMEOUT = 30
+MAX_RETRIES = 3
+RETRY_DELAY = 2  # Seconds, multiplied by the attempt number
+PAGE_DELAY = 0.5  # Polite delay between page requests
+
+
+# Build the canonical library URL from a username or a full profile URL.
+# Note: Backloggd's CDN returns 403 for any path under /u/<user>/games/<...>,
+# including a bare trailing slash, so the URL must end in "games" exactly.
+def normalize_profile_input(profile_url_or_username):
+    if profile_url_or_username.startswith("http"):
+        if "/u/" not in profile_url_or_username:
+            sys.exit(f"Could not find a username in the URL: {profile_url_or_username}")
+        username = profile_url_or_username.split("/u/")[1].split("/")[0]
+    else:
+        username = profile_url_or_username.strip("/")
+
+    if not username:
+        sys.exit("No username provided.")
+
+    return username, f"{BASE_URL}/u/{username}/games"
+
+
+# Fetch one library page and return its game entries
 def fetch_profile_page(profile_url, page):
-    try:
-        paginated_url = f"{profile_url}?page={page}"  # Append the page number to the profile URL
-        response = requests.get(paginated_url)
-        response.raise_for_status()  # Raise an HTTPError for bad responses
+    paginated_url = f"{profile_url}?page={page}"
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = requests.get(paginated_url, timeout=TIMEOUT)
+            if response.status_code == 404:
+                sys.exit(f"Profile not found: {profile_url} (check the username)")
+            if response.status_code == 403:
+                sys.exit(
+                    "Got 403 Forbidden. Backloggd may be blocking automated "
+                    "requests, or the URL format has changed."
+                )
+            response.raise_for_status()
 
-        soup = BeautifulSoup(response.content, "html.parser")
-        game_entries = soup.select(
-            ".rating-hover"
-        )  # Select all game entries with the "rating-hover" class
+            soup = BeautifulSoup(response.content, "html.parser")
+            return soup.select(".rating-hover")
+        except requests.exceptions.RequestException as e:
+            if attempt == MAX_RETRIES:
+                sys.exit(f"Error fetching page {page} after {MAX_RETRIES} attempts: {e}")
+            print(f"Error fetching page {page} (attempt {attempt}/{MAX_RETRIES}): {e}")
+            time.sleep(RETRY_DELAY * attempt)
 
-        if not game_entries:  # Check if no games are found on the page
-            return []
 
-        return game_entries
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching page {page}: {e}")
-        return []
-
-# Extract title and rating data from the fetched game entries
+# Extract title, rating, and metadata from the game entries on one page
 def extract_game_data(game_entries):
     game_data = []
-    for game_entry in game_entries:
-        # Extract game title
-        title_element = game_entry.select_one(".game-text-centered")
+    for entry in game_entries:
+        title_element = entry.select_one(".game-text-centered")
         title = title_element.get_text(strip=True) if title_element else "Unknown Title"
 
-        # Extract game rating - Method 1: stars-top
-        stars_top_element = game_entry.select_one(".stars-top")
-        rating = 0.0  # Default rating if nothing is found
+        # game_id is not written to the CSV; it is only used to detect
+        # when Backloggd starts repeating the last page
+        cover_element = entry.select_one(".game-cover")
+        game_id = cover_element.get("game_id", "") if cover_element else ""
 
+        # Unrated games have no star element at all; leave the rating empty
+        rating = ""
+        stars_top_element = entry.select_one(".stars-top")
         if stars_top_element:
             style = stars_top_element.get("style", "")
-            width = (
-                style.split("width:")[1].split("%")[0].strip()
-                if "width:" in style
-                else "0"
-            )
-            try:
-                rating = float(width) / 20  # Convert percentage width to 5-star scale
-            except ValueError:
-                rating = 0.0
-
-        # Method 2: data-rating (only if stars-top is missing)
-        if rating == 0.0:
-            game_cover_element = game_entry.find(attrs={"data-rating": True})
-            if game_cover_element:
-                data_rating = game_cover_element.get("data-rating")
+            if "width:" in style:
+                width = style.split("width:")[1].split("%")[0].strip()
                 try:
-                    rating = float(data_rating) / 2  # Convert 10-point scale to 5-star
+                    rating = float(width) / 20  # Star width percentage -> 5-star scale
+                except ValueError:
+                    rating = ""
+
+        # Fallback for older page variants that expose a data-rating attribute
+        if rating == "":
+            fallback_element = entry.find(attrs={"data-rating": True})
+            if fallback_element:
+                try:
+                    rating = float(fallback_element.get("data-rating")) / 2
                 except (ValueError, TypeError):
-                    rating = 0.0
+                    rating = ""
 
-        game_data.append((title, rating)) 
+        game_data.append({"title": title, "rating": rating, "game_id": game_id})
     return game_data
-
 
 
 # Fetch all game data by iterating through pages until no new data is found
 def fetch_all_game_data(profile_url):
     all_game_data = []
     page = 1
-    previous_page_data_hash = None
+    previous_page_ids = None
 
     while True:
         print(f"Fetching page {page}...")
         game_entries = fetch_profile_page(profile_url, page)
 
-        # Detect duplicate or empty pages to stop scraping
-        current_page_data_hash = hash(tuple(game_entries)) if game_entries else None
-        if not game_entries or current_page_data_hash == previous_page_data_hash:
-            if not game_entries:
-                print("No more game entries found. Stopping scraping.")
-            elif current_page_data_hash == previous_page_data_hash:
-                print("Duplicate page data found. Stopping scraping.")
+        if not game_entries:
+            print("No more game entries found. Stopping.")
             break
 
         game_data = extract_game_data(game_entries)
-        all_game_data.extend(game_data)  # Add the extracted data to the result list
-        previous_page_data_hash = current_page_data_hash
+
+        # Past the last page Backloggd keeps serving the final page,
+        # so a repeated page means we are done
+        current_page_ids = [game["game_id"] for game in game_data]
+        if current_page_ids == previous_page_ids:
+            break
+
+        all_game_data.extend(game_data)
+        previous_page_ids = current_page_ids
         page += 1
+        time.sleep(PAGE_DELAY)
 
     return all_game_data
+
 
 # Save the fetched game data to a CSV file
 def save_to_csv(username, game_data):
@@ -95,16 +128,15 @@ def save_to_csv(username, game_data):
     try:
         with open(filename, mode="w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            writer.writerow(["Title", "Rating"])  # Write the header row
-            writer.writerows(game_data)  # Write the game data
-        print(f"Data saved to {filename}")
-    except IOError as e:
-        print(f"Error saving data to {filename}: {e}")
+            writer.writerow(["Title", "Rating"])
+            for game in game_data:
+                writer.writerow([game["title"], game["rating"]])
+        print(f"Saved {len(game_data)} games to {filename}")
+    except OSError as e:
+        sys.exit(f"Error saving data to {filename}: {e}")
+
 
 if __name__ == "__main__":
-    import argparse
-
-    # Command-line argument parsing
     parser = argparse.ArgumentParser(
         description="Scrape game data from a Backloggd profile and save to a CSV file."
     )
@@ -115,14 +147,12 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # Determine if input is a full URL or just a username
-    if args.profile_url_or_username.startswith("http"):
-        profile_url = args.profile_url_or_username
-        username = profile_url.split("/u/")[1].split("/")[0]  # Extract username from the URL
-    else:
-        username = args.profile_url_or_username
-        profile_url = f"https://backloggd.com/u/{username}/games/"  # Construct URL from the username
+    username, profile_url = normalize_profile_input(args.profile_url_or_username)
 
     print(f"Scraping data for username: {username}")
-    all_game_data = fetch_all_game_data(profile_url) 
-    save_to_csv(username, all_game_data)  # Save the data to a CSV file
+    all_game_data = fetch_all_game_data(profile_url)
+
+    if not all_game_data:
+        sys.exit(f"No games found for {username}.")
+
+    save_to_csv(username, all_game_data)

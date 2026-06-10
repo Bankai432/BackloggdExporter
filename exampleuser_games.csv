@@ -1,21 +1,22 @@
 Title,Rating
+Battlefield Heroes,5.0
+Old School RuneScape,5.0
+Apex Legends,5.0
+Helldivers 2,5.0
+Blade & Sorcery,5.0
 Tribes: Ascend,5.0
+TrackMania United Forever,5.0
+Rivals of Aether II,5.0
 Super Mario Odyssey,5.0
 Half-Life: Alyx,5.0
-Blade & Sorcery,5.0
 Dark Souls: Remastered,5.0
 Dark Souls III,5.0
 Battlefield 1,5.0
 Swords and Sandals Classic Collection,5.0
-Apex Legends,5.0
-Old School RuneScape,5.0
-Helldivers 2,5.0
 Elden Ring,5.0
-Battlefield Heroes,5.0
-Minecraft,4.5
-Beat Saber,4.5
-Melvor Idle,4.5
 Euro Truck Simulator 2,4.5
+Beat Saber,4.5
+Minecraft,4.5
 Sleeping Dogs: Definitive Edition,4.5
 World of Warcraft,4.5
 Sekiro: Shadows Die Twice,4.5
@@ -23,16 +24,55 @@ Rocket League,4.5
 The Pathless,4.5
 Hades,4.5
 God of War,4.5
+Melvor Idle,4.0
+Borderlands 2,4.0
 Call of Duty: Modern Warfare,4.0
 SuperHot VR,4.0
 Into the Radius,4.0
 Ni no Kuni II: Revenant Kingdom,4.0
-
+Mount & Blade: Warband,4.0
+Monster Hunter: World,4.0
+Half-Life 2,4.0
+Grand Theft Auto V,4.0
+Final Fantasy VII Remake Intergrade,4.0
+Deep Rock Galactic,4.0
+Black Mesa,4.0
+Shadow Fight 2,4.0
+Clash of Clans,4.0
+Age of War,4.0
+Wolfenstein: The Old Blood,4.0
+Wolfenstein: The New Order,4.0
+Titanfall 2,4.0
+Sludge Life,4.0
+World of Warcraft Classic,4.0
+RuneScape,4.0
+Nodebuster,4.0
+Marvel's Spider-Man Remastered,4.0
+The Looker,4.0
+Kingdom Rush Frontiers,4.0
+Kingdom Rush,4.0
+Firewatch,4.0
+Brotato,4.0
+Doom,4.0
+Age of Mythology: Extended Edition,4.0
+Assassin's Creed Odyssey,4.0
+Free Realms,4.0
+Call of Duty: Black Ops Cold War,3.5
+Borderlands 3,3.5
+TrackMania 2: Stadium,3.5
+Two Point Hospital,3.5
+Overcooked! 2,3.5
+Fuel,3.5
+Vertigo: Remastered,3.5
+Splitgate,3.5
+Sifu,3.5
+Portal,3.5
+Path of Exile,3.5
+Old School Rally,3.5
 Minecraft Dungeons,3.5
 Isle of Arrows,3.5
 Far Cry 5,3.5
 Celeste,3.5
-Borderlands 2,3.5
 Archero,3.5
 Clash Royale,3.5
 BBTAN,3.5
@@ -46,10 +86,12 @@ Job Simulator: The 2050 Archives,3.5
 Horizon Zero Dawn: Complete Edition,3.5
 The Gnorp Apologue,3.5
 Donut County,3.5
+Red Faction: Guerrilla,3.0
+Crysis,3.0
+Roblox,3.0
 Unnamed Space Idle,3.0
 Thumper,3.0
 Star Wars Jedi: Fallen Order,3.0
-Red Faction: Guerrilla - Steam Edition,3.0
 Mini Motorways,3.0
 Combat Arms,3.0
 Cities: Skylines,3.0
@@ -72,7 +114,31 @@ Bloons TD 5,3.0
 Subway Surfers,3.0
 Hill Climb Racing,3.0
 Wreckfest,3.0
-
+Tekken 7,3.0
+Swords & Souls: Neverseen,3.0
+Samorost 2,3.0
+PUBG: Battlegrounds,3.0
+Need for Speed: Heat,3.0
+Cursorblade,3.0
+Cookie Clicker,3.0
+Clustertruck,3.0
+Call of Duty: Black Ops III,3.0
+Chivalry 2,3.0
+Mini Ninjas,2.5
+Worms W.M.D,2.5
+The Witcher 2: Assassins of Kings - Enhanced Edition,2.5
+Warhammer: Vermintide 2,2.5
+Throne and Liberty,2.5
+Spin Rhythm XD,2.5
+Smite,2.5
+Planet Coaster,2.5
+PC Building Simulator,2.5
+My Friend Pedro,2.5
+Left 4 Dead 2,2.5
+Garry's Mod,2.5
+DayZ,2.5
+Content Warning,2.5
+Bejeweled 3,2.5
 PowerWash Adventure,2.5
 Pistol Whip,2.5
 Sons of the Forest,2.5
@@ -92,7 +158,33 @@ Sniper: Ghost Warrior 2,2.5
 The Ramp,2.5
 Leaf Blower Revolution: Idle Game,2.5
 Knightmare Tower,2.5
-
+Hellblade: Senua's Sacrifice,2.5
+Goobies,2.5
+Driftwood,2.5
+Crysis Remastered,2.5
+Crush the Castle Legacy Collection,2.5
+Counter-Strike 2,2.5
+Stumble Guys,2.0
+Warframe,2.0
+Samorost 3,2.0
+Raft,2.0
+Quake Champions,2.0
+Payday 2,2.0
+Nightmare Kart,2.0
+Lost Ark,2.0
+The LEGO Movie Videogame,2.0
+Happy Room,2.0
+Final Fantasy XIV Online,2.0
+Dead Island: Definitive Edition,2.0
+Lethal Company,2.0
+Bridge Constructor,2.0
+The Binding of Isaac,2.0
+Arcanists,2.0
+Arizona Sunshine,2.0
+Tribes of Midgard,2.0
+Killing Floor 2,2.0
+House Flipper,2.0
+Dungeon Defenders II,2.0
 Destiny 2,2.0
 Battlefield 2042,2.0
 Zombie Road Trip,2.0
@@ -101,7 +193,6 @@ Fruit Ninja Classic,2.0
 Bike Race Pro: Motor Racing,2.0
 Backflip Madness,2.0
 Flappy Bird,2.0
-Stumble Guys,2.0
 Sniper: Ghost Warrior 3,2.0
 Lyne,2.0
 PegIdle,2.0
@@ -140,6 +231,7 @@ Mr.Mine,1.5
 Jack Move,1.5
 Earn to Die 2,1.5
 Don't Escape Trilogy,1.5
+Shift Legacy Collection,1.0
 Unturned,1.0
 Table Top Racing: World Tour,1.0
 Sonny,1.0
@@ -171,4 +263,4 @@ Hill Climb Racing 2,0.5
 Shatterline,0.5
 Masked Shooters 2,0.5
 Krunker,0.5
-Warface: Clutch,0.0
+Warface: Clutch,
