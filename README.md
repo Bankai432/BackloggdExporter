@@ -53,8 +53,4 @@ The file will have the following structure:
 
 Ratings are on a 5-star scale. Unrated games have an empty rating.
 
-## License
-
-This project is licensed under the MIT License.
-
 Disclaimer: This tool is not affiliated with or endorsed by Backloggd. Use it responsibly and respect the website's terms of use.
