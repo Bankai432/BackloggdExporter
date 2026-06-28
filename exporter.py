@@ -1,5 +1,6 @@
 import argparse
 import csv
+import json
 import sys
 import time
 
@@ -10,7 +11,8 @@ BASE_URL = "https://backloggd.com"
 TIMEOUT = 30
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # Seconds, multiplied by the attempt number
-PAGE_DELAY = 0.5  # Polite delay between page requests
+PAGE_DELAY = 0.1  # Polite delay between page requests
+
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -24,6 +26,12 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.5",
     "Referer": "https://backloggd.com/",
 }
+try:
+    import lxml
+    PARSER = "lxml"
+except ImportError:
+    PARSER = "html.parser"
+    
 
 
 # Build the canonical library URL from a username or a full profile URL.
@@ -62,7 +70,7 @@ def fetch_profile_page(profile_url, page):
                 )
             response.raise_for_status()
 
-            soup = BeautifulSoup(response.content, "html.parser")
+            soup = BeautifulSoup(response.content, "PARSER")
             return soup.select(".rating-hover")
         except requests.exceptions.RequestException as e:
             if attempt == MAX_RETRIES:
@@ -139,7 +147,7 @@ def fetch_all_game_data(profile_url):
 
 
 # Save the fetched game data to a CSV file
-def save_to_csv(username, game_data):
+def save_to_csv(username, game_data,  ensure_ascii=False):
     filename = f"{username}_games.csv"
     print(f"Saving data to {filename}...")
     try:
@@ -152,6 +160,15 @@ def save_to_csv(username, game_data):
     except OSError as e:
         sys.exit(f"Error saving data to {filename}: {e}")
 
+def save_to_json(username, game_data,  ensure_ascii=False):
+    filename = f"{username}_games.json"
+    print(f"Saving data to {filename}...")
+    try:
+        with open(filename, mode="w", encoding="utf-8") as file:
+            json.dump(game_data, file, indent=4)
+        print(f"Saved {len(game_data)} games to {filename}")
+    except OSError as e:
+        sys.exit(f"Error saving data to {filename}: {e}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -161,6 +178,12 @@ if __name__ == "__main__":
         "profile_url_or_username",
         type=str,
         help="Backloggd profile URL or username (e.g., https://backloggd.com/u/username/games/ or simply 'username')",
+    )
+    parser.add_argument(
+        "--format",
+        choices=["csv", "json"],
+        default="csv",
+        help="Output format (default: csv)"
     )
     args = parser.parse_args()
 
@@ -172,4 +195,7 @@ if __name__ == "__main__":
     if not all_game_data:
         sys.exit(f"No games found for {username}.")
 
-    save_to_csv(username, all_game_data)
+    if args.format == "csv":
+        save_to_csv(username, all_game_data)
+    elif args.format == "json":
+        save_to_json(username, all_game_data)
