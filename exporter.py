@@ -11,6 +11,19 @@ TIMEOUT = 30
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # Seconds, multiplied by the attempt number
 PAGE_DELAY = 0.5  # Polite delay between page requests
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/137.0.0.0 Safari/537.36"
+    ),
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;"
+        "q=0.9,image/avif,image/webp,*/*;q=0.8"
+    ),
+    "Accept-Language": "en-US,en;q=0.5",
+    "Referer": "https://backloggd.com/",
+}
 
 
 # Build the canonical library URL from a username or a full profile URL.
@@ -35,7 +48,11 @@ def fetch_profile_page(profile_url, page):
     paginated_url = f"{profile_url}?page={page}"
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            response = requests.get(paginated_url, timeout=TIMEOUT)
+            response = requests.get(
+                    paginated_url,
+                    headers=HEADERS,
+                    timeout=TIMEOUT
+                )
             if response.status_code == 404:
                 sys.exit(f"Profile not found: {profile_url} (check the username)")
             if response.status_code == 403:
